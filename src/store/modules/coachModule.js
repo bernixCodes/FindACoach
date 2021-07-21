@@ -45,6 +45,9 @@ export default {
         registerCoach(state, payload) {
             // state.coaches.push(payload)
             state.coaches = [...state.coaches, payload];
+        },
+        setCoaches(state, payload) {
+            state.coaches = payload;
         }
     },
 
@@ -65,6 +68,27 @@ export default {
                 ...coachData,
                 id: userId
             })
+        },
+
+        async loadCoaches(context) {
+            await axios.get('https://find-a-coach-app-545f1-default-rtdb.firebaseio.com/coaches.json')
+                .then(response => {
+                    let coaches = [];
+
+                    for (const key in response.data) {
+
+                        let coach = response.data[key].coachData;
+                        coach.id = key;
+                        coaches.push(coach)
+                    }
+                    context.commit('setCoaches', coaches)
+                })
+                .catch(error => {
+                    // const response = error.response.data;
+                    new Error("Failed to fetch");
+                    throw error;
+                })
+
         }
     }
 

@@ -4,6 +4,7 @@ export default {
     namespaced: true,
     state() {
         return {
+            lastFetch: null,
             coaches: [
                 {
                     id: 'c1',
@@ -38,6 +39,14 @@ export default {
             const coaches = getters.coaches;
             const userId = rootGetters.userId;
             return coaches.some(coach => coach.id === userId)
+        },
+        shouldUpdate(state) {
+            const lastFetch = state.lastFetch;
+            if (!lastFetch) {
+                return true
+            }
+            const currentTimestamp = new Date().getTime();
+            return (currentTimestamp - lastFetch) / 1000 > 60
         }
     },
 
@@ -48,6 +57,9 @@ export default {
         },
         setCoaches(state, payload) {
             state.coaches = payload;
+        },
+        setFetchTimestamp(state) {
+            state.lastFetch = new Date().getTime();
         }
     },
 
@@ -70,7 +82,10 @@ export default {
             })
         },
 
-        async loadCoaches(context) {
+        async loadCoaches(context, payload) {
+            if (!payload.forceRefresh && !context.getters.shouldUpdate) {
+                return;
+            }
             await axios.get('https://find-a-coach-app-545f1-default-rtdb.firebaseio.com/coaches.json')
                 .then(response => {
                     let coaches = [];
@@ -81,7 +96,8 @@ export default {
                         coach.id = key;
                         coaches.push(coach)
                     }
-                    context.commit('setCoaches', coaches)
+                    context.commit('setCoaches', coaches);
+                    context.commit('setFetchTimestamp')
                 })
                 .catch(error => {
                     // const response = error.response.data;

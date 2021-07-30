@@ -1,49 +1,57 @@
 <template>
-<div>
-  <base-dialog :show="!!error" title="An error occured" @close="handleError">
-    <p>{{ error }}</p>
-  </base-dialog>
-  <section>
-    <coach-filter @change-filter="setFilters"></coach-filter>
-  </section>
-  <section>
-    <base-card>
-      <div class="controls">
-        <base-button mode="outline" @click="loadCoaches(true)"
-          >Refresh</base-button
-        >
-        <base-button v-if="!isCoach && !isLoading" link to="/register"
-          >Register as Coach</base-button
-        >
-      </div>
-      <div v-if="isLoading">
-        <base-spinner></base-spinner>
-      </div>
-      <ul v-else-if="hasCoach">
-        <coach-item
-          v-for="coach in filteredCoach"
-          :key="coach.id"
-          :id="coach.id"
-          :first-name="coach.firstName"
-          :last-name="coach.lastName"
-          :hourly-rate="coach.hourlyRate"
-          :areas="coach.areas"
-        ></coach-item>
-      </ul>
-      <h3 v-else>No coach available.</h3>
-    </base-card>
-  </section>
+  <div>
+    <base-dialog :show="!!error" title="An error occured" @close="handleError">
+      <p>{{ error }}</p>
+    </base-dialog>
+    <section>
+      <coach-filter @change-filter="setFilters"></coach-filter>
+    </section>
+    <section>
+      <base-card>
+        <div class="controls">
+          <base-button mode="outline" @click="loadCoaches(true)"
+            >Refresh</base-button
+          >
+          <base-button link to="/auth?redirect=register" v-if="!isLoggedIn"
+            >Login to register as coach</base-button
+          >
+          <base-button
+            v-if="isCoach && !isCoach && !isLoading"
+            link
+            to="/register"
+            >Register as Coach</base-button
+          >
+        </div>
+        <div v-if="isLoading">
+          <base-spinner></base-spinner>
+        </div>
+        <ul v-else-if="hasCoach">
+          <coach-item
+            v-for="coach in filteredCoach"
+            :key="coach.id"
+            :id="coach.id"
+            :first-name="coach.firstName"
+            :last-name="coach.lastName"
+            :hourly-rate="coach.hourlyRate"
+            :areas="coach.areas"
+          ></coach-item>
+        </ul>
+        <h3 v-else>No coach available.</h3>
+      </base-card>
+    </section>
   </div>
 </template>
 
 <script>
 import CoachItem from '@/components/coaches/CoachItem';
 import CoachFilter from '@/components/coaches/CoachFilter';
+import BaseButton from '../../components/ui/BaseButton.vue';
 
 export default {
   components: {
     CoachItem,
     CoachFilter,
+    BaseButton,
   },
   data() {
     return {
@@ -57,6 +65,9 @@ export default {
     };
   },
   computed: {
+    isLoggedIn() {
+      return this.$store.getters.isAuthenticated;
+    },
     isCoach() {
       return this.$store.getters['coaches/isCoach'];
     },

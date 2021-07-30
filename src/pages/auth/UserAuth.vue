@@ -73,15 +73,20 @@ export default {
       this.isLoading = true;
       try {
         if (this.mode === 'login') {
-          //
+          await this.$store.dispatch('login', {
+            email: this.email,
+            password: this.password,
+          });
         } else {
           await this.$store.dispatch('signup', {
             email: this.email,
             password: this.password,
           });
         }
+        const redirectUrl = '/' + (this.$route.query.redirect || 'coaches');
+        this.$router.replace(redirectUrl);
       } catch (error) {
-        this.error = error.message || 'Sign up failed';
+        this.error = 'Sign up failed : Check credentials ';
       }
       this.isLoading = false;
     },

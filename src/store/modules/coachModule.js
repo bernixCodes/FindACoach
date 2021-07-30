@@ -73,7 +73,8 @@ export default {
                 hourlyRate: data.hourlyRate,
                 areas: data.areas,
             }
-            await axios.put(`https://find-a-coach-app-545f1-default-rtdb.firebaseio.com/coaches/${userId}.json`, {
+            const token = context.rootGetters.token;
+            await axios.put(`https://find-a-coach-app-545f1-default-rtdb.firebaseio.com/coaches/${userId}.json?auth=` + token, {
                 coachData
             })
             context.commit('registerCoach', {
